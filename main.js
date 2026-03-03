@@ -95,7 +95,36 @@ function init() {
     // Events
     window.addEventListener('resize', onWindowResize);
     window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('click', onClick);
+    
+    // Better mobile tap handling vs click (prevent triggering after camera drag)
+    let pointerDownX = 0;
+    let pointerDownY = 0;
+    
+    // Unified interaction handler
+    const handleDown = (clientX, clientY) => {
+        pointerDownX = clientX;
+        pointerDownY = clientY;
+    };
+    
+    const handleUp = (clientX, clientY) => {
+        const dist = Math.abs(clientX - pointerDownX) + Math.abs(clientY - pointerDownY);
+        if (dist < 10) {
+            onClick({ clientX, clientY });
+        }
+    };
+
+    // Pointer events (Desktop & Modern Mobile)
+    window.addEventListener('pointerdown', (e) => handleDown(e.clientX, e.clientY));
+    window.addEventListener('pointerup', (e) => handleUp(e.clientX, e.clientY));
+    
+    // Touch events explicitly (Fallback for bulletproof iOS/Safari handling)
+    window.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 0) handleDown(e.touches[0].clientX, e.touches[0].clientY);
+    });
+    window.addEventListener('touchend', (e) => {
+        if (e.changedTouches.length > 0) handleUp(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    });
+
     backBtn.addEventListener('click', onBackToHangar);
 
     // Hide Loading
