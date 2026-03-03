@@ -105,18 +105,29 @@ function init() {
 }
 
 function buildEnvironment() {
-    // Floor Reflector (simulating the glossy reflection)
+    const isMobile = window.innerWidth < 768;
+
+    // Floor (Reflector only on Desktop for performance)
     const floorGeometry = new THREE.PlaneGeometry(600, 600);
-    const floor = new Reflector(floorGeometry, {
-        clipBias: 0.003,
-        textureWidth: window.innerWidth * window.devicePixelRatio,
-        textureHeight: window.innerHeight * window.devicePixelRatio,
-        color: 0x888888,
-        recursion: 1
-    });
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -2.01;
-    scene.add(floor);
+    
+    if (!isMobile) {
+        const floor = new Reflector(floorGeometry, {
+            clipBias: 0.003,
+            textureWidth: window.innerWidth * window.devicePixelRatio,
+            textureHeight: window.innerHeight * window.devicePixelRatio,
+            color: 0x888888,
+            recursion: 1
+        });
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.y = -2.01;
+        scene.add(floor);
+    } else {
+        // Simple dark floor for mobile
+        const baseFloor = new THREE.Mesh(floorGeometry, new THREE.MeshBasicMaterial({ color: 0x111111 }));
+        baseFloor.rotation.x = -Math.PI / 2;
+        baseFloor.position.y = -2.01;
+        scene.add(baseFloor);
+    }
 
     // Semitransparent Epoxy Floor Surface
     const epoxyMat = new THREE.MeshStandardMaterial({ 
@@ -124,7 +135,7 @@ function buildEnvironment() {
         roughness: 0.2, 
         metalness: 0.1, 
         transparent: true, 
-        opacity: 0.85 
+        opacity: isMobile ? 0.95 : 0.85 
     });
     const epoxyFloor = new THREE.Mesh(floorGeometry, epoxyMat);
     epoxyFloor.rotation.x = -Math.PI / 2;
@@ -135,23 +146,26 @@ function buildEnvironment() {
     // Floor Decal (Sticker / Painted Logo)
     const textureLoader = new THREE.TextureLoader();
     const decalTex = textureLoader.load('./assets/favicon.png');
+    decalTex.colorSpace = THREE.SRGBColorSpace;
+    
     // Using an aspect ratio preserving plane (assuming square logo, adjust dimensions if needed)
     const decalSize = 60; 
     const decalGeo = new THREE.PlaneGeometry(decalSize, decalSize);
-    const decalMat = new THREE.MeshStandardMaterial({ 
+
+    // Use MeshBasicMaterial to ensure visibility
+    const decalMat = new THREE.MeshBasicMaterial({ 
         map: decalTex, 
-        transparent: true, 
-        roughness: 0.8, 
-        emissive: 0xffffff,
-        emissiveMap: decalTex,
-        emissiveIntensity: 0.1 // Just enough to make the logo pop against the dark floor
+        transparent: true,
+        opacity: 0.8, // Slightly transparent to blend
+        depthWrite: false, // Prevent z-fighting with transparency
     });
+    
     const floorDecal = new THREE.Mesh(decalGeo, decalMat);
     floorDecal.rotation.x = -Math.PI / 2;
     // Set Y just slightly above the epoxy floor (-2.0) to prevent z-fighting
     floorDecal.position.set(0, -1.98, -40); 
     // It shouldn't cast shadows, but can receive them to feel grounded
-    floorDecal.receiveShadow = true; 
+    // floorDecal.receiveShadow = true; // Not needed for BasicMaterial
     scene.add(floorDecal);
 
     // Wall parameters
@@ -288,18 +302,37 @@ function buildLights() {
     scene.add(fillLight);
 
     // Linear Light fixtures (Keep models for context)
-    [-120, -60, 0, 60, 120].forEach(x => {
-        [-100, -20, 60, 140].forEach(z => {
-            const fixture = new THREE.Mesh(new THREE.BoxGeometry(18, 0.2, 0.6), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 5 }));
-            fixture.position.set(x, 56.5, z);
-            scene.add(fixture);
+    // Reduce light count for mobile performance - stick to ambient/hemi/directional primarily
+    const isMobile = window.innerWidth < 768;
+    
+    // Only create detailed point lights if not on mobile, or reduce them significantly
+    if (!isMobile) {
+        [-120, -60, 0, 60, 120].forEach(x => {
+            [-100, -20, 60, 140].forEach(z => {
+                const fixture = new THREE.Mesh(new THREE.BoxGeometry(18, 0.2, 0.6), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 5 }));
+                fixture.position.set(x, 56.5, z);
+                scene.add(fixture);
 
-            const pl = new THREE.PointLight(0xffffff, 150, 120);
-            pl.position.set(x, 56, z);
-            scene.add(pl);
+                const pl = new THREE.PointLight(0xffffff, 50, 80); // Reduce intensity/range slightly
+                pl.position.set(x, 56, z);
+                scene.add(pl);
+            });
         });
-    });
-}
+    } else {
+        // Mobile: Just fixtures, no individual point lights per fixture (saves ~20 lights)
+        [-120, -60, 0, 60, 120].forEach(x => {
+            [-100, -20, 60, 140].forEach(z => {
+                const fixture = new THREE.Mesh(new THREE.BoxGeometry(18, 0.2, 0.6), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 2 }));
+                fixture.position.set(x, 56.5, z);
+                scene.add(fixture);
+            });
+        });
+        
+        // Add one central overhead light to compensate
+        const centerLight = new THREE.PointLight(0xffffff, 100, 200);
+        centerLight.position.set(0, 50, 0);
+        scene.add(centerLight);
+    }
 
 function buildDoors() {
     const defaultHeight = 20;
@@ -343,16 +376,26 @@ function buildDoors() {
             doorGroup.position.set(0, doorHeight / 2, 0.05);
 
             let mat;
+            // Check for mobile for material selection
+            const isMobile = window.innerWidth < 768;
+
             if (data.doorImage) {
                 const textureLoader = new THREE.TextureLoader();
                 const doorTex = textureLoader.load(data.doorImage);
-                // Adjust texture to fit properly (optional depending on image aspect)
-                // doorTex.repeat.set(1, 1);
-                mat = new THREE.MeshStandardMaterial({ 
-                    map: doorTex, 
-                    roughness: 0.5, 
-                    metalness: 0.2 
-                });
+                // Important for proper color display
+                doorTex.colorSpace = THREE.SRGBColorSpace; 
+                doorTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                
+                // Use BasicMaterial on mobile to ensure visibility without complex lighting
+                if (isMobile) {
+                    mat = new THREE.MeshBasicMaterial({ map: doorTex });
+                } else {
+                    mat = new THREE.MeshStandardMaterial({ 
+                        map: doorTex, 
+                        roughness: 0.5, 
+                        metalness: 0.2 
+                    });
+                }
             } else {
                 mat = new THREE.MeshStandardMaterial({ color: 0xf3f4f6, roughness: 0.5, metalness: 0.2 });
             }
