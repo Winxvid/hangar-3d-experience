@@ -5,12 +5,15 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import gsap from 'gsap';
 
+import doorImageSrc from './assets/why_choose.png';
+import faviconSrc from './assets/favicon.png';
+
 // Configuration
 const PAGES = {
     mainEntrance: {
         id: 'mainEntrance',
         title: 'AirProtect Detailing',
-        doorImage: './assets/why_choose.png',
+        doorImage: doorImageSrc,
         color: 0x3b82f6,
         cssColor: '#3b82f6',
         position: new THREE.Vector3(0, -2, -149.5), // Centered on the back wall
@@ -145,7 +148,7 @@ function buildEnvironment() {
 
     // Floor Decal (Sticker / Painted Logo)
     const textureLoader = new THREE.TextureLoader();
-    const decalTex = textureLoader.load('./assets/favicon.png');
+    const decalTex = textureLoader.load(faviconSrc);
     decalTex.colorSpace = THREE.SRGBColorSpace;
     
     // Using an aspect ratio preserving plane (assuming square logo, adjust dimensions if needed)
@@ -156,16 +159,15 @@ function buildEnvironment() {
     const decalMat = new THREE.MeshBasicMaterial({ 
         map: decalTex, 
         transparent: true,
-        opacity: 0.8, // Slightly transparent to blend
-        depthWrite: false, // Prevent z-fighting with transparency
+        opacity: 0.95, // High opacity to look like fresh paint/sticker
+        depthWrite: true, // Allow depth writing to ensure it renders over the floor
     });
     
     const floorDecal = new THREE.Mesh(decalGeo, decalMat);
     floorDecal.rotation.x = -Math.PI / 2;
     // Set Y just slightly above the epoxy floor (-2.0) to prevent z-fighting
-    floorDecal.position.set(0, -1.98, -40); 
-    // It shouldn't cast shadows, but can receive them to feel grounded
-    // floorDecal.receiveShadow = true; // Not needed for BasicMaterial
+    floorDecal.position.set(0, -1.95, -40); // Lifted slightly more to ensure visibility
+    floorDecal.receiveShadow = true;
     scene.add(floorDecal);
 
     // Wall parameters
@@ -393,8 +395,8 @@ function buildDoors() {
                 } else {
                     mat = new THREE.MeshStandardMaterial({ 
                         map: doorTex, 
-                        roughness: 0.5, 
-                        metalness: 0.2 
+                        roughness: 0.6, // Matte finish like a vinyl wrap
+                        metalness: 0.0  // Non-metallic
                     });
                 }
             } else {
@@ -403,6 +405,7 @@ function buildDoors() {
 
             const doorMesh = new THREE.Mesh(new THREE.PlaneGeometry(doorWidth, doorHeight), mat);
             doorMesh.castShadow = true;
+            doorMesh.receiveShadow = true; // Make sure it catches light
             doorGroup.add(doorMesh);
 
             // Roll mechanism
