@@ -78,6 +78,9 @@ function init() {
     controls.target.set(0, 5.5, -150); // Look all the way to the back wall
     controls.update();
 
+    // Responsive Camera Adjustment
+    updateCameraPosition();
+
     // Raycaster
     raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
@@ -390,7 +393,8 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-
+    updateCameraPosition();
+    
     // Attempt to resize reflector
     scene.children.forEach(c => {
         if (c.type === 'Reflector' && c.getRenderTarget) {
@@ -403,52 +407,15 @@ function onWindowResize() {
 function onPointerMove(event) {
     if (selectedPage) return; // Disable hover if locked into a page
 
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-
-    // Intersect the main door groups
-    let found = null;
-    let intersects = [];
-
-    // Check meshes inside door groups
-    doors.forEach(door => {
-        const hits = raycaster.intersectObject(door, true);
-        if (hits.length > 0) {
-            found = door;
-        }
-    });
-
-    if (found !== hoveredDoor) {
-        // Reset old
-        if (hoveredDoor) {
-            hoveredDoor.userData.glow.intensity = 0;
-            hoveredDoor.userData.doorMesh.material.emissive.setHex(0x000000);
-            hoveredDoor.userData.banner.material.color.setHex(0x1e293b);
-            document.body.style.cursor = 'default';
-        }
-        hoveredDoor = found;
-        // Apply new
-        if (hoveredDoor) {
-            const data = hoveredDoor.userData.pageData;
-            hoveredDoor.userData.glow.intensity = 50; // New Three.js intensity system requires higher numbers
-            hoveredDoor.userData.doorMesh.material.emissive.setHex(data.color);
-            hoveredDoor.userData.doorMesh.material.emissiveIntensity = 0.2;
-            hoveredDoor.userData.banner.material.color.setHex(data.color);
-            document.body.style.cursor = 'pointer';
-
-            // Show UI
-            hoverTitle.innerText = data.title;
-            hoverDesc.innerText = data.description;
-            hoverInfo.style.opacity = '1';
-        } else {
-            hoverInfo.style.opacity = '0';
-        }
-    }
+    checkIntersection(event.clientX, event.clientY);
 }
 
 function onClick(event) {
+    // Ensure we have current intersection data even if pointerMove didn't fire (common on touch)
+    if (!hoveredDoor && !selectedPage) {
+        checkIntersection(event.clientX, event.clientY);
+    }
+    
     if (hoveredDoor && !selectedPage && !hoveredDoor.userData.open) {
         const data = hoveredDoor.userData.pageData;
         selectedPage = data.id;
@@ -542,12 +509,65 @@ function onBackToHangar() {
     setTimeout(() => {
         pagesContainer.classList.add('hidden');
         pageContent.innerHTML = '';
+        
+        const isMobile = window.innerWidth < 768; // Check for mobile width
+        const resetZ = isMobile ? 250 : 180; // Use further back position for mobile
 
         // Reset Camera
-        const originPos = { x: 0, y: 5.5, z: 180 }; // Push the reset view back even further
-        const originLook = { x: 0, y: 5.5, z: -150 }; // Look all the way back into the hangar at reset
+        const originPos = { x: 0, y: 5.5, z: resetZ }; // Push the reset view back even further
+        const originLook = { x: 0, y: 5.5, z: -150 }; // Look all the way to the back wall
         const dummyLook = { ...originLook }; // Starting point doesn't matter much as we will animate it
+    mouse.x = (clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(clientY / window.innerHeight) * 2 + 1;
 
+    raycaster.setFromCamera(mouse, camera);
+
+    // Intersect the main door groups
+    let found = null;
+    
+    // Check meshes inside door groups
+    doors.forEach(door => {
+        const hits = raycaster.intersectObject(door, true);
+        if (hits.length > 0) {
+            found = door;
+        }
+    });
+
+    if (found !== hoveredDoor) {
+        // Reset old
+        if (hoveredDoor) {
+            hoveredDoor.userData.glow.intensity = 0;
+            if (hoveredDoor.userData.doorMesh) {
+                hoveredDoor.userData.doorMesh.material.emissive.setHex(0x000000);
+            }
+            if (hoveredDoor.userData.banner) {
+                hoveredDoor.userData.banner.material.color.setHex(0x1e293b);
+            }
+            document.body.style.cursor = 'default';
+        }
+        hoveredDoor = found;
+        // Apply new
+        if (hoveredDoor) {
+            const data = hoveredDoor.userData.pageData;
+            hoveredDoor.userData.glow.intensity = 50; 
+            if (hoveredDoor.userData.doorMesh) {
+                hoveredDoor.userData.doorMesh.material.emissive.setHex(data.color);
+                hoveredDoor.userData.doorMesh.material.emissiveIntensity = 0.2;
+            }
+            if (hoveredDoor.userData.banner) {
+                hoveredDoor.userData.banner.material.color.setHex(data.color);
+            }
+            document.body.style.cursor = 'pointer';
+
+            // Show UI
+            if (hoverTitle) hoverTitle.innerText = data.title;
+            if (hoverDesc) hoverDesc.innerText = data.description;
+            if (hoverInfo) hoverInfo.style.opacity = '1';
+        } else {
+            if (hoverInfo) hoverInfo.style.opacity = '0';
+        }
+    }
+}
         // Actually look from current to origin over time
         gsap.to(camera.position, {
             ...originPos,
