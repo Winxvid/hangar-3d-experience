@@ -1,0 +1,22 @@
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+canvas {
+    display: block;
+    outline: none;
+}
+
+/* Custom Scrollbar for the pages container */
+#pages-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+#pages-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#pages-container::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.5); /* slate-400 semi-transparent */
+    border-radius: 20px;
+}

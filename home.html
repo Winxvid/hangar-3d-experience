@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirProtect | Preserving Aircraft Surfaces. Protecting Value.</title>
+    <meta name="description"
+        content="Professional aircraft detailing focused on long-term protection for aircraft owners in Texas and Oklahoma.">
+    <link rel="stylesheet" href="index.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="assets/favicon.png" type="image/png">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & Framer Motion CDNs -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@11.0.0/dist/framer-motion.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        /* Custom perspective for 3D effects */
+        .perspective-1500 { perspective: 1500px; }
+        .preserve-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+    </style>
+    <style>
+        /* ── Preloader ── */
+        #preloader {
+            position: fixed;
+            inset: 0;
+            background: #000000;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+                        visibility 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #preloader.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        #preloader img {
+            width: min(45vw, 320px);
+            height: auto;
+            margin-bottom: 2.5rem;
+            animation: preloaderPulse 2s ease-in-out infinite;
+        }
+
+        /* Subtle breathing pulse on the logo */
+        @keyframes preloaderPulse {
+            0%, 100% { opacity: 0.85; transform: scale(1); }
+            50%      { opacity: 1;    transform: scale(1.03); }
+        }
+
+        /* Slim loading bar */
+        .preloader-bar {
+            width: min(40vw, 260px);
+            height: 2px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .preloader-bar::after {
+            content: '';
+            display: block;
+            width: 40%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, #d4a84b, transparent);
+            border-radius: 999px;
+            animation: preloaderSlide 1.2s ease-in-out infinite;
+        }
+
+        @keyframes preloaderSlide {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(350%); }
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            #preloader img {
+                width: 55vw;
+                max-width: 240px;
+                margin-bottom: 2rem;
+            }
+            .preloader-bar {
+                width: 55vw;
+                max-width: 220px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Preloader: only shown on first visit via sessionStorage -->
+    <div id="preloader" class="hidden" aria-hidden="true">
+        <img src="assets/preloader.gif" alt="Loading AirProtect...">
+        <div class="preloader-bar"></div>
+    </div>
+
+    <header id="main-header" class="glass">
+        <div class="top-bar">
+            <div class="container">
+                <div class="top-bar-content">
+                    <a href="mailto:info@aircraftprotect.com"><i class="fa-regular fa-envelope"></i>
+                        info@aircraftprotect.com</a>
+                    <a href="tel:8177524762"><i class="fa-solid fa-phone"></i> (817) 752-4762</a>
+                </div>
+            </div>
+        </div>
+        <div class="container nav-wrapper">
+            <a href="#" class="logo">
+                <img src="assets/logo.png" alt="AirProtect Logo">
+            </a>
+            <button class="hamburger" id="hamburger-menu" aria-label="Open navigation menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav>
+                <ul id="main-nav">
+                    <li><a href="#hero">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li class="has-dropdown">
+                        <a href="#services" class="dropdown-toggle">Services <i
+                                class="fa-solid fa-chevron-down dropdown-arrow"></i></a>
+                        <div class="dropdown-menu mega-menu">
+                            <div class="mega-col">
+                                <h4 class="mega-title"><i class="fa-solid fa-plane"></i> Exterior Care</h4>
+                                <ul>
+                                    <li><a href="services/dry-wash.html">Dry Wash</a></li>
+                                    <li><a href="services/wet-wash.html">Wet Wash</a></li>
+                                    <li><a href="services/exterior-wax.html">Exterior Wax</a></li>
+                                    <li><a href="services/brightwork-polishing.html">Brightwork Polishing</a></li>
+                                    <li><a href="services/protective-coatings.html">Protective Coatings</a></li>
+                                    <li><a href="services/window-restoration.html">Window Restoration</a></li>
+                                    <li><a href="services/de-ice-boot.html">De-Ice Boot Refurbishment</a></li>
+                                    <li><a href="services/paint-revitalization.html">Paint Revitalization</a></li>
+                                </ul>
+                            </div>
+                            <div class="mega-col" style="border-right: none;">
+                                <h4 class="mega-title"><i class="fa-solid fa-couch"></i> Interior Care</h4>
+                                <ul>
+                                    <li><a href="services/interior-cleaning.html">Interior Cleaning &amp; Detail</a>
+                                    </li>
+                                    <li><a href="services/leather-conditioning.html">Leather Conditioning</a></li>
+                                    <li><a href="services/leather-repair.html">Leather Repair &amp; Re-Dye</a></li>
+                                    <li><a href="services/stain-removal.html">Stain Removal</a></li>
+                                    <li><a href="services/lavatory-sanitation.html">Lavatory &amp; Galley Sanitation</a>
+                                    </li>
+                                    <li><a href="services/carpet-extraction.html">Carpet &amp; Upholstery Extraction</a>
+                                    </li>
+                                    <li><a href="services/wood-polishing.html">Wood &amp; Trim Polishing</a></li>
+                                    <li><a href="services/dry-cleaning.html">Dry Cleaning Carpet &amp; Upholstery</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="has-dropdown">
+                        <a href="#packages" class="dropdown-toggle">Packages <i
+                                class="fa-solid fa-chevron-down dropdown-arrow"></i></a>
+                        <div class="dropdown-menu mega-menu">
+                            <div class="mega-col">
+                                <h4 class="mega-title"><i class="fa-solid fa-crosshairs"></i> Targeted Support</h4>
+                                <ul>
+                                    <li><a href="services/gear-well-cleaning.html">Gear Well &amp; Belly Cleaning</a>
+                                    </li>
+                                    <li><a href="services/oxidation-correction.html">Oxidation Correction</a></li>
+                                    <li><a href="services/preservation-consultation.html">Preservation Consultations</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="mega-col" style="border-right: none;">
+                                <h4 class="mega-title"><i class="fa-solid fa-shield-halved"></i> Flightline Programs
+                                </h4>
+                                <ul>
+                                    <li><a href="services/flightline-standard.html">Flightline Standard</a></li>
+                                    <li><a href="services/flightline-elite.html">Flightline Elite</a></li>
+                                    <li><a href="services/flightline-command.html">Flightline Command</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                    <li><a href="#contact" class="btn btn-outline"
+                            onclick="event.preventDefault(); document.getElementById('footer').scrollIntoView({behavior: 'smooth'});">Quote</a>
+                    </li>
+                    <li style="display: flex; align-items: center;">
+                        <button class="theme-toggle" aria-label="Toggle light/dark mode" type="button">
+                            <span class="theme-toggle-thumb"><i class="fa-solid fa-moon"></i></span>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="hero">
+            <div class="hero-sticky">
+                <canvas id="hero-canvas"></canvas>
+                <div class="container">
+                    <div class="hero-content">
+                        <h1>
+                            <span class="hero-line text-gradient" id="hero-line-1">Preserving Aircraft</span>
+                            <span class="hero-line text-gradient" id="hero-line-2">Surfaces.</span>
+                            <span class="hero-line text-gradient" id="hero-line-3">Protecting Value.</span>
+                        </h1>
+                        <div class="hero-btns" id="hero-btns-container">
+                            <a href="#services" class="btn"
+                                onclick="event.preventDefault(); document.getElementById('services').scrollIntoView({behavior: 'smooth'});">View
+                                Packages</a>
+                            <a href="#contact" class="btn btn-outline"
+                                onclick="event.preventDefault(); document.getElementById('footer').scrollIntoView({behavior: 'smooth'});">Request
+                                Consultation</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="why-choose-us" class="section-padding" style="background: var(--clr-bg); padding-top: 2rem;">
+            <!-- Desktop: animated React cards -->
+            <div id="root" class="why-choose-desktop"></div>
+
+            <!-- Mobile: original static cards -->
+            <div class="why-choose-mobile">
+                <div class="container">
+                    <div class="section-title fade-in-scroll">
+                        <p class="text-gradient" style="font-weight: bold; letter-spacing: 3px;">Why Choose Us</p>
+                        <h2>Why Choose AirProtect Over the Competition?</h2>
+                        <p style="max-width: 850px; margin: 1.5rem auto 0; color: var(--clr-text-muted); font-size: 1.1rem; line-height: 1.6;">
+                            Discover why AirProtect stands out in the industry with our unparalleled expertise and commitment to excellence.</p>
+                    </div>
+                    <div class="packages-grid" style="flex-wrap: wrap;">
+                        <div class="package-card glass"
+                            style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('assets/skilled_trained.webp') no-repeat center/cover;">
+                            <img src="assets/favicon.png" alt="AirProtect Icon" class="package-icon" loading="lazy">
+                            <h3>Skilled and Trained Technicians</h3>
+                            <p style="margin-bottom: 1.5rem; color: #ccc;">Our detailers are skilled
+                                professionals with years of experience and training.</p>
+                        </div>
+                        <div class="package-card glass"
+                            style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('assets/INSURED_CERTIFIED.png') no-repeat center/cover;">
+                            <img src="assets/favicon.png" alt="AirProtect Icon" class="package-icon">
+                            <h3>Insured and Certified</h3>
+                            <p style="margin-bottom: 1.5rem; color: #ccc;">We are a legitimate corporation
+                                with all required insurance and compliant certifications.</p>
+                        </div>
+                        <div class="package-card glass"
+                            style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('assets/aircraft_specific.webp') no-repeat center/cover;">
+                            <img src="assets/favicon.png" alt="AirProtect Icon" class="package-icon">
+                            <h3>Aircraft Specific Care</h3>
+                            <p style="margin-bottom: 1.5rem; color: #ccc;">Every aircraft is inspected and
+                                serviced based on its condition, usage, and long-term protection needs.</p>
+                        </div>
+                        <div class="package-card glass"
+                            style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('assets/AFTERCARE.png') no-repeat center/cover;">
+                            <img src="assets/favicon.png" alt="AirProtect Icon" class="package-icon">
+                            <h3>Aftercare Support &amp; Service</h3>
+                            <p style="margin-bottom: 1.5rem; color: #ccc;">Our dedication to being elite at
+                                what we do isn't just rooted in our work; it is rooted in our service and care for our
+                                customers.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <style>
+            /* Desktop: show animated, hide static */
+            .why-choose-desktop { display: block; }
+            .why-choose-mobile { display: none; }
+
+            /* Mobile: show static, hide animated */
+            @media (max-width: 768px) {
+                .why-choose-desktop { display: none !important; }
+                .why-choose-mobile { display: block !important; }
+                .why-choose-mobile .packages-grid {
+                    flex-wrap: wrap !important;
+                }
+                .why-choose-mobile .package-card {
+                    flex: 1 1 100% !important;
+                    min-width: 0 !important;
+                }
+            }
+
+            /* Scroll fade-in for mobile Why Choose Us text */
+            .fade-in-scroll {
+                opacity: 0;
+                transform: translateY(40px);
+                transition: opacity 0.9s cubic-bezier(0.25, 1, 0.5, 1), transform 0.9s cubic-bezier(0.25, 1, 0.5, 1);
+            }
+            .fade-in-scroll.visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            .card-container {
+                display: flex;
+                justify-content: space-between;
+                gap: 1rem;
+                flex-wrap: wrap;
+            }
+
+            .card {
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 1.5rem;
+                border-radius: 10px;
+                text-align: center;
+                flex: 1 1 calc(25% - 1rem);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .card-icon {
+                width: 50px;
+                height: 50px;
+                margin-bottom: 1rem;
+            }
+
+            .card h3 {
+                margin: 1rem 0 0.5rem;
+                font-size: 1.5rem;
+            }
+
+            .card p {
+                font-size: 1rem;
+                color: #ccc;
+            }
+
+            .packages-grid {
+                display: flex;
+                justify-content: space-between;
+                gap: 1.5rem;
+                flex-wrap: nowrap;
+            }
+
+            .package-card {
+                flex: 1;
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 1.5rem;
+                border-radius: 10px;
+                text-align: center;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                text-decoration: none;
+                display: block;
+                cursor: pointer;
+            }
+
+            .package-card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .package-icon {
+                width: 60px;
+                height: 60px;
+                margin-bottom: 1rem;
+            }
+
+            .package-card h3 {
+                margin: 1rem 0 0.5rem;
+                font-size: 1.5rem;
+            }
+
+            .package-card p {
+                font-size: 1rem;
+                color: #ccc;
+            }
+        </style>
+
+        <section id="services" class="section-padding" style="background: var(--clr-bg);">
+            <div class="container">
+                <div class="section-title">
+                    <p class="text-gradient" style="font-weight: bold; letter-spacing: 3px;">Exterior Care</p>
+                    <h2>Exterior Preservation</h2>
+                    <p style="max-width: 800px; margin: 2rem auto 0; color: var(--clr-text-muted);">
+                        At AirProtect, we specialize in delivering premium exterior detailing services tailored for
+                        aviation enthusiasts and aircraft owners. Our skilled team utilizes industry-leading products
+                        and state-of-the-art equipment to ensure every detail of your aircraft receives the care it
+                        deserves.
+                    </p>
+                </div>
+
+                <div class="services-interactive">
+                    <div class="hotspot-wrapper">
+                        <img src="assets/plane_exterior_top.png" alt="Aircraft Exterior Top View" class="plane-visual"
+                            loading="lazy">
+
+                        <!-- Left Side -->
+                        <a href="services/dry-wash.html" class="hotspot-label hotspot-left" id="ext-1">Dry Wash</a>
+
+                        <a href="services/wet-wash.html" class="hotspot-label hotspot-left" id="ext-2">Wet Wash</a>
+                        <a href="services/exterior-wax.html" class="hotspot-label hotspot-left" id="ext-3">Exterior
+                            Wax</a>
+                        <a href="services/brightwork-polishing.html" class="hotspot-label hotspot-left"
+                            id="ext-4">Brightwork Polishing</a>
+
+                        <!-- Right Side -->
+                        <a href="services/protective-coatings.html" class="hotspot-label hotspot-right"
+                            id="ext-5">Protective Coatings</a>
+                        <a href="services/window-restoration.html" class="hotspot-label hotspot-right" id="ext-6">Window
+                            Restoration &amp; Polishing</a>
+                        <a href="services/de-ice-boot.html" class="hotspot-label hotspot-right" id="ext-7">De-Ice Boot
+                            Refurbishment</a>
+                        <a href="services/paint-revitalization.html" class="hotspot-label hotspot-right"
+                            id="ext-8">Paint Revitalization</a>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </section>
+
+        <section id="interior-services" class="section-padding" style="background: var(--clr-bg);">
+            <div class="container">
+                <div class="section-title">
+                    <p class="text-gradient" style="font-weight: bold; letter-spacing: 3px;">Cabin Care</p>
+                    <h2>Interior Services</h2>
+                    <p style="max-width: 800px; margin: 2rem auto 0; color: var(--clr-text-muted);">
+                        At AirProtect, we excel in providing top-tier interior detailing services designed specifically
+                        for aircraft owners and aviation enthusiasts. Our expert team uses cutting-edge techniques and
+                        premium products to ensure your aircraft's interior is meticulously cleaned and maintained.
+                    </p>
+                </div>
+
+                <div class="services-interactive">
+                    <div class="hotspot-wrapper">
+                        <img src="assets/plane_interior_top.png" alt="Aircraft Interior Top View" class="plane-visual"
+                            loading="lazy">
+
+                        <!-- Left Side -->
+                        <a href="services/interior-cleaning.html" class="hotspot-label hotspot-left" id="int-1">Interior
+                            Cleaning &amp; Detail</a>
+                        <a href="services/leather-conditioning.html" class="hotspot-label hotspot-left"
+                            id="int-2">Leather Conditioning</a>
+                        <a href="services/leather-repair.html" class="hotspot-label hotspot-left" id="int-3">Leather
+                            Repair &amp; Re-Dye</a>
+                        <a href="services/stain-removal.html" class="hotspot-label hotspot-left" id="int-4">Stain
+                            Removal</a>
+                        <!-- Right Side -->
+                        <a href="services/lavatory-sanitation.html" class="hotspot-label hotspot-right"
+                            id="int-5">Lavatory &amp; Galley Sanitation</a>
+                        <a href="services/carpet-extraction.html" class="hotspot-label hotspot-right" id="int-6">Carpet
+                            &amp; Upholstery Extraction</a>
+                        <a href="services/wood-polishing.html" class="hotspot-label hotspot-right" id="int-7">Wood &amp;
+                            Trim Polishing</a>
+                        <a href="services/dry-cleaning.html" class="hotspot-label hotspot-right" id="int-8">Dry Cleaning
+                            Carpet &amp; Upholstery</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="packages" class="section-padding" style="background: rgba(255, 255, 255, 0.02);">
+            <div class="container">
+                <div class="section-title">
+                    <p class="text-gradient" style="font-weight: bold; letter-spacing: 3px;">Flightline Programs</p>
+                    <h2>Aircraft Preservation Packages</h2>
+                    <p
+                        style="max-width: 850px; margin: 1.5rem auto 0; color: var(--clr-text-muted); font-size: 1.1rem; line-height: 1.6;">
+                        These are the centerpiece of our service offerings &mdash; comprehensive preservation programs
+                        designed for long-term aircraft protection and value retention.</p>
+                </div>
+                <div class="packages-grid">
+                    <a href="services/flightline-standard.html" class="package-card glass"
+                        style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('assets/flightline_standard_card.jpeg') no-repeat center/cover;">
+                        <img src="assets/favicon.png" alt="AirProtect Icon" class="package-icon">
+                        <h3>Flightline Standard</h3>
+                        <p style="margin-bottom: 1.5rem; color: #ccc;">Foundational cleaning and
+                            short-term protection for actively flown aircraft.</p>
+                        <ul>
+                            <li>Cleaning &amp; Short-term Protection</li>
+                            <li>Ideal for Actively Flown Aircraft</li>
+                            <li>Exterior Surface Preservation</li>
+                            <li>Quick Refresh</li>
+                        </ul>
+                    </a>
+
+                    <a href="services/flightline-elite.html" class="package-card glass"
+                        style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('assets/FLIGHTLINE_ELITE.png') no-repeat center/cover;">
+                        <img src="assets/favicon.png" alt="AirProtect Icon" class="package-icon">
+                        <h3>Flightline Elite</h3>
+                        <p style="margin-bottom: 1.5rem; color: #ccc;">Deep clean and mid-term
+                            protection designed to reduce surface wear and long-term degradation.</p>
+                        <ul>
+                            <li>Deep Clean &amp; Mid-term Protection</li>
+                            <li>Reduced Surface Degradation</li>
+                            <li>Paint Preservation System</li>
+                            <li>Cabin Sanitization</li>
+                        </ul>
+                    </a>
+
+                    <a href="services/flightline-command.html" class="package-card glass"
+                        style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('assets/FLIGHTLINE_COMMAND.png') no-repeat center/cover;">
+                        <img src="assets/favicon.png" alt="AirProtect Icon" class="package-icon">
+                        <h3>Flightline Command</h3>
+                        <p style="margin-bottom: 1.5rem; color: #ccc;">Flagship multi-year preservation
+                            program for owners focused on long-term aircraft value and protection.</p>
+                        <ul>
+                            <li>Multi-year Preservation Program</li>
+                            <li>Long-term Value Retention</li>
+                            <li>Comprehensive Surface Protection</li>
+                            <li>Priority Scheduling</li>
+                        </ul>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="targeted-support" class="section-padding" style="background: var(--clr-surface);">
+            <div class="container">
+                <div class="targeted-support-container">
+                    <div class="targeted-support-text">
+                        <p class="text-gradient" style="font-weight: bold; letter-spacing: 3px;">Specialized Services
+                        </p>
+                        <h2>Targeted Support</h2>
+                        <p
+                            style="margin-bottom: 2rem; color: var(--clr-text-muted); font-size: 1.1rem; line-height: 1.7;">
+                            Beyond our comprehensive preservation packages, we offer specialized services designed to
+                            address specific aircraft care needs and maintenance challenges.
+                        </p>
+                        <ul class="targeted-support-list">
+                            <li><a href="services/gear-well-cleaning.html">Gear well and belly cleaning</a></li>
+                            <li><a href="services/oxidation-correction.html">Oxidation evaluation and correction</a>
+                            </li>
+                            <li><a href="services/preservation-consultation.html">Aircraft preservation
+                                    consultations</a></li>
+                        </ul>
+                    </div>
+                    <div class="targeted-support-image gif-container">
+                        <img src="assets/Targeted_support.GIF" alt="Targeted Support Services" loading="lazy">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div id="footer-placeholder"></div>
+        <script src="load-footer.js"></script>
+
+        <script>
+            // Preloader — show only on first visit per session
+            (function () {
+                const preloader = document.getElementById('preloader');
+                if (!preloader) return;
+
+                const isFirstVisit = !sessionStorage.getItem('ap_visited');
+
+                if (isFirstVisit) {
+                    // Mark as visited so subsequent navigation skips preloader
+                    sessionStorage.setItem('ap_visited', '1');
+
+                    // Show the preloader immediately
+                    preloader.classList.remove('hidden');
+                    // Prevent scrolling while preloader is visible
+                    document.body.style.overflow = 'hidden';
+
+                    function hidePreloader() {
+                        preloader.classList.add('hidden');
+                        document.body.style.overflow = '';
+                        // Remove from DOM after fade completes
+                        preloader.addEventListener('transitionend', () => preloader.remove(), { once: true });
+                    }
+
+                    // Hide once page is fully loaded, with a brief pause for polish
+                    if (document.readyState === 'complete') {
+                        setTimeout(hidePreloader, 3500);
+                    } else {
+                        window.addEventListener('load', () => setTimeout(hidePreloader, 3500));
+                    }
+                } else {
+                    // Not first visit — remove immediately without showing
+                    preloader.remove();
+                }
+            })();
+        </script>
+        <script src="main.js"></script>
+        <script src="theme-toggle.js"></script>
+        <script>
+            (function () {
+                const hamburger = document.getElementById('hamburger-menu');
+                const nav = document.getElementById('main-nav');
+                const body = document.body;
+                let isAnimating = false;
+
+                function openMenu() {
+                    if (isAnimating || nav.classList.contains('nav-open')) return;
+                    isAnimating = true;
+
+                    // Add classes
+                    nav.classList.add('nav-open');
+                    hamburger.classList.add('is-active');
+                    body.classList.add('nav-open');
+
+                    setTimeout(() => { isAnimating = false; }, 450);
+                }
+
+                function closeMenu() {
+                    if (isAnimating || !nav.classList.contains('nav-open')) return;
+                    isAnimating = true;
+
+                    // Remove classes
+                    nav.classList.remove('nav-open');
+                    hamburger.classList.remove('is-active');
+
+                    // Close all sub-dropdowns
+                    document.querySelectorAll('.has-dropdown.open').forEach(el => el.classList.remove('open'));
+
+                    // Remove body lock after animation
+                    setTimeout(() => {
+                        body.classList.remove('nav-open');
+                        isAnimating = false;
+                    }, 450);
+                }
+
+                function toggleMenu(e) {
+                    if (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+
+                    if (nav.classList.contains('nav-open')) {
+                        closeMenu();
+                    } else {
+                        openMenu();
+                    }
+                }
+
+                // Hamburger toggle
+                hamburger.addEventListener('click', toggleMenu);
+
+                // Mobile dropdown toggle (Services / Packages accordions)
+                document.querySelectorAll('.has-dropdown > .dropdown-toggle').forEach(toggle => {
+                    toggle.addEventListener('click', function (e) {
+                        if (window.innerWidth <= 768) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const parent = this.closest('.has-dropdown');
+
+                            // Close other open dropdowns (accordion behavior)
+                            document.querySelectorAll('.has-dropdown.open').forEach(el => {
+                                if (el !== parent) el.classList.remove('open');
+                            });
+
+                            parent.classList.toggle('open');
+                        }
+                    });
+                });
+
+                // Close menu when a real link is clicked
+                document.querySelectorAll('#main-nav a:not(.dropdown-toggle)').forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (window.innerWidth <= 768) {
+                            // Close immediately but keep body locked for a split second to prevent jump
+                            // The closeMenu function already handles the timing
+                            closeMenu();
+                        }
+                    });
+                });
+
+                // Close on outside click
+                document.addEventListener('click', function (e) {
+                    if (window.innerWidth <= 768 && nav.classList.contains('nav-open')) {
+                        if (!nav.contains(e.target) && !hamburger.contains(e.target)) {
+                            closeMenu();
+                        }
+                    }
+                });
+
+                // Close on Escape key
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape' && nav.classList.contains('nav-open')) {
+                        closeMenu();
+                    }
+                });
+            })();
+        </script>
+        <script src="gif-optimizer.js" defer></script>
+        <script type="text/javascript">
+            const { motion, useScroll, useTransform } = window.Motion;
+            const { useRef } = React;
+
+            const AirplaneIcon = ({ className }) => React.createElement('svg', {
+                viewBox: "0 0 100 100",
+                className: className
+            }, 
+                React.createElement('path', {
+                    d: "M15 75 C 0 95, 50 100, 85 45 C 105 15, 85 0, 70 10",
+                    fill: "none",
+                    stroke: "#cc2b2b",
+                    strokeWidth: "8",
+                    strokeLinecap: "round"
+                }),
+                React.createElement('path', {
+                    d: "M50 10 L58 45 L95 65 L58 60 L50 90 L42 60 L5 65 L42 45 Z",
+                    fill: "#1a3a8a"
+                })
+            );
+
+            const CARD_DATA = [
+                { id: 1, title: 'SKILLED AND TRAINED TECHNICIANS', description: 'Our detailers are skilled professionals with years of experience and training.', bgImage: 'assets/skilled_trained.webp', rotation: -12 },
+                { id: 2, title: 'INSURED AND CERTIFIED', description: 'We are a legitimate corporation with all required insurance and compliant certifications.', bgImage: 'assets/INSURED_CERTIFIED.png', rotation: -4 },
+                { id: 3, title: 'AIRCRAFT SPECIFIC CARE', description: 'Every aircraft is inspected and serviced based on its condition, usage, and long-term protection needs.', bgImage: 'assets/aircraft_specific.webp', rotation: 4 },
+                { id: 4, title: 'AFTERCARE SUPPORT & SERVICE', description: "Our dedication to being elite at what we do isn't just rooted in our work; it is rooted in our service and care for our customers.", bgImage: 'assets/AFTERCARE.png', rotation: 12 }
+            ];
+
+            function App() {
+                const containerRef = useRef(null);
+                const { scrollYProgress } = useScroll({
+                    target: containerRef,
+                    offset: ["start start", "end end"]
+                });
+
+                const x1 = useTransform(scrollYProgress, [0.2, 0.6], ['0%', '-30%']);
+                const x2 = useTransform(scrollYProgress, [0.2, 0.6], ['0%', '-10%']);
+                const x3 = useTransform(scrollYProgress, [0.2, 0.6], ['0%', '10%']);
+                const x4 = useTransform(scrollYProgress, [0.2, 0.6], ['0%', '30%']);
+                const gap = useTransform(scrollYProgress, [0.2, 0.6], [0, 16]);
+                const innerRadius = useTransform(scrollYProgress, [0.2, 0.4], [0, 12]);
+                const borderOpacity = useTransform(scrollYProgress, [0.2, 0.4], [0, 0.2]);
+                const shadowOpacity = useTransform(scrollYProgress, [0.2, 0.4], [0, 0.5]);
+                const imgOpacity = useTransform(scrollYProgress, [0.3, 0.5], [1, 0.1]);
+                const contentOpacity = useTransform(scrollYProgress, [0.5, 0.7], [0, 1]);
+                const contentY = useTransform(scrollYProgress, [0.6, 0.9], [20, 0]);
+                const rotateY = useTransform(scrollYProgress, [0.3, 0.7], [0, 180]);
+                const groupScale = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0.8, 1, 1, 0.9]);
+
+            return React.createElement('main', { className: "text-white", style: { background: 'var(--clr-bg)', color: 'var(--clr-text)' } },
+                React.createElement(motion.div, {
+                    initial: { opacity: 0, y: 40 },
+                    whileInView: { opacity: 1, y: 0 },
+                    viewport: { once: true, amount: 0.6 },
+                    transition: { duration: 0.9, ease: [0.25, 1, 0.5, 1] },
+                    style: { textAlign: 'center', paddingTop: '4rem', paddingBottom: '2rem', maxWidth: '900px', margin: '0 auto', paddingLeft: '1rem', paddingRight: '1rem' }
+                },
+                    React.createElement('p', { className: "text-gradient", style: { fontWeight: 'bold', letterSpacing: '3px', fontSize: '0.95rem', marginBottom: '0.75rem' } }, "Why Choose Us"),
+                    React.createElement('h2', { style: { fontSize: 'clamp(2rem, 5vw, 3.5rem)', marginTop: '0', marginBottom: '1.25rem', color: 'var(--clr-text)', fontWeight: '900', lineHeight: '1.15', textTransform: 'uppercase', letterSpacing: '1px' } }, "Why Choose AirProtect Over the Competition?"),
+                    React.createElement('p', { style: { maxWidth: '750px', margin: '0 auto', color: 'var(--clr-text-muted)', fontSize: '1rem', lineHeight: '1.7' } }, "Discover why AirProtect stands out in the industry with our unparalleled expertise and commitment to excellence.")
+                ),
+                React.createElement('div', { ref: containerRef, className: "relative h-[400vh]" },
+                    React.createElement('div', { className: "sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden perspective-1500" },
+                        React.createElement(motion.div, { style: { scale: groupScale }, className: "relative w-full max-w-7xl px-4 md:px-12 flex justify-center items-center" },
+                            React.createElement('div', { className: "flex w-full h-full items-center justify-center preserve-3d" },
+                                CARD_DATA.map((card, index) => {
+                                    const xTransform = [x1, x2, x3, x4][index];
+                                    const rotationZ = useTransform(scrollYProgress, [0.4, 0.8], [0, card.rotation]);
+                                    const borderColor = useTransform(borderOpacity, (v) => `rgba(255,255,255,${v})`);
+                                    const borderW = useTransform(scrollYProgress, [0.2, 0.4], [0, 1]);
+                                    const cardMargin = useTransform(scrollYProgress, [0.0, 0.2, 0.6], [index !== 0 ? -1 : 0, 0, 16]);
+                                    return React.createElement(motion.div, {
+                                            key: card.id,
+                                            style: { 
+                                                x: xTransform,
+                                                rotateZ: rotationZ,
+                                                rotateY: rotateY,
+                                                marginLeft: cardMargin,
+                                                borderTopLeftRadius: index === 0 ? 12 : innerRadius,
+                                                borderBottomLeftRadius: index === 0 ? 12 : innerRadius,
+                                                borderTopRightRadius: index === 3 ? 12 : innerRadius,
+                                                borderBottomRightRadius: index === 3 ? 12 : innerRadius,
+                                                boxShadow: useTransform(shadowOpacity, (v) => `0 20px 50px rgba(0,0,0,${v})`),
+                                                zIndex: index === 1 || index === 2 ? 10 : 5,
+                                                borderWidth: borderW,
+                                                borderStyle: 'solid',
+                                                borderColor: borderColor
+                                            },
+                                            className: "relative w-[180px] md:w-[280px] h-[320px] md:h-[500px] bg-transparent flex flex-col preserve-3d"
+                                        },
+                                            // Front Side
+                                            React.createElement(motion.div, { style: { opacity: imgOpacity }, className: "absolute inset-0 z-10 backface-hidden overflow-hidden rounded-[inherit]" },
+                                                React.createElement('img', {
+                                                    src: "assets/why_choose.png",
+                                                    className: "h-full object-cover",
+                                                    style: { width: '400%', maxWidth: 'none', left: `-${index * 100}%`, position: 'absolute' }
+                                                })
+                                            ),
+                                            // Back Side
+                                            React.createElement(motion.div, { style: { opacity: contentOpacity, y: contentY, rotateY: 180 }, className: "absolute inset-0 flex flex-col z-20 items-center text-center backface-hidden overflow-hidden rounded-[inherit]" },
+                                                React.createElement('img', { src: card.bgImage, className: "absolute inset-0 w-full h-full object-cover" }),
+                                                React.createElement('div', { className: "absolute inset-0 bg-black/60" }),
+                                                React.createElement('div', { className: "relative h-full p-6 md:p-8 flex flex-col items-center justify-center" },
+                                                    React.createElement('img', { src: 'assets/favicon.png', className: "w-16 h-16 mb-6" }),
+                                                    React.createElement('h3', { className: "text-xl md:text-2xl font-black mb-4 tracking-widest text-white" }, card.title),
+                                                    React.createElement('div', { className: "w-12 h-1 bg-white/30 mb-6 rounded-full" }),
+                                                    React.createElement('p', { className: "text-sm md:text-base leading-relaxed text-white/80 max-w-[90%]" }, card.description)
+                                                )
+                                            )
+                                        );
+                                    })
+                                )
+                            )
+                        )
+                    )
+                );
+            }
+
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(React.createElement(App));
+        </script>
+        <script>
+            // Scroll fade-in for mobile Why Choose Us title
+            document.addEventListener('DOMContentLoaded', function() {
+                const fadeEls = document.querySelectorAll('.fade-in-scroll');
+                if (!fadeEls.length) return;
+                const io = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            io.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.3 });
+                fadeEls.forEach(function(el) { io.observe(el); });
+            });
+        </script>
+    </main>
+</body>
+
+</html>

@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../../Desktop/assets"
+		},
+		{
+			"path": "../../../Desktop/services"
+		},
+		{
+			"path": "../../../Desktop/hero-sequence"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "hangar-html-version"
+	}
+}
