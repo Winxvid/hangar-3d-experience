@@ -503,20 +503,15 @@ function showPage(data) {
     });
 }
 
-function onBackToHangar() {
-    pagesContainer.style.opacity = '0';
+// Helper functions for mobile responsiveness
+function updateCameraPosition() {
+    // Only on initial load or severe resize, push camera for mobile
+    if (window.innerWidth < 768 && camera.position.z < 200) {
+        camera.position.z = 250;
+    }
+}
 
-    setTimeout(() => {
-        pagesContainer.classList.add('hidden');
-        pageContent.innerHTML = '';
-        
-        const isMobile = window.innerWidth < 768; // Check for mobile width
-        const resetZ = isMobile ? 250 : 180; // Use further back position for mobile
-
-        // Reset Camera
-        const originPos = { x: 0, y: 5.5, z: resetZ }; // Push the reset view back even further
-        const originLook = { x: 0, y: 5.5, z: -150 }; // Look all the way to the back wall
-        const dummyLook = { ...originLook }; // Starting point doesn't matter much as we will animate it
+function checkIntersection(clientX, clientY) {
     mouse.x = (clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(clientY / window.innerHeight) * 2 + 1;
 
@@ -568,6 +563,22 @@ function onBackToHangar() {
         }
     }
 }
+
+function onBackToHangar() {
+    pagesContainer.style.opacity = '0';
+
+    setTimeout(() => {
+        pagesContainer.classList.add('hidden');
+        pageContent.innerHTML = '';
+        
+        const isMobile = window.innerWidth < 768; // Check for mobile width
+        const resetZ = isMobile ? 250 : 180; // Use further back position for mobile
+
+        // Reset Camera
+        const originPos = { x: 0, y: 5.5, z: resetZ }; // Push the reset view back even further
+        const originLook = { x: 0, y: 5.5, z: -150 }; // Look all the way to the back wall
+        const dummyLook = { ...originLook }; // Starting point doesn't matter much as we will animate it
+
         // Actually look from current to origin over time
         gsap.to(camera.position, {
             ...originPos,
