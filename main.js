@@ -7,54 +7,16 @@ import gsap from 'gsap';
 
 // Configuration
 const PAGES = {
-    about: {
-        id: 'about',
-        title: 'HOME',
+    mainEntrance: {
+        id: 'mainEntrance',
+        title: 'AirProtect Detailing',
         doorImage: './assets/why_choose.png',
-        color: 0x3b82f6, // hex
+        color: 0x3b82f6,
         cssColor: '#3b82f6',
-        position: new THREE.Vector3(-22, -2, -149.5), // Snug against the back wall (z is -150)
-        description: 'Return to the main hangar view.',
+        position: new THREE.Vector3(0, -2, -149.5), // Centered on the back wall
+        width: 90, // Double width (was ~40 per door previously)
+        description: 'Enter the AirProtect Detailing experience.',
         externalUrl: 'airprotectdetail/index.html'
-    },
-    booking: {
-        id: 'booking',
-        title: 'Request Consult',
-        doorImage: './assets/airprotect_logo.jpg',
-        color: 0xf59e0b,
-        cssColor: '#f59e0b',
-        position: new THREE.Vector3(22, -2, -149.5), // Snug against the back wall, almost touching HOME
-        description: 'Schedule your professional detailing consultation.',
-        content: `
-            <div class="relative h-[40vh] flex items-center justify-center text-white overflow-hidden" style="background-color: #f59e0b">
-                <div class="absolute inset-0 opacity-20">
-                    <div class="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent"></div>
-                    <img src="https://picsum.photos/id/1071/1920/1080" class="w-full h-full object-cover" />
-                </div>
-                <div class="relative z-10 text-center">
-                    <h1 class="text-6xl font-bold tracking-tighter uppercase">BOOKING</h1>
-                </div>
-            </div>
-            <div class="max-w-2xl mx-auto px-8 py-16">
-                <form id="booking-form" class="space-y-6">
-                    <div class="grid grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label class="text-sm font-bold text-slate-700 uppercase tracking-wider">Full Name</label>
-                            <input required type="text" class="w-full p-4 rounded-xl bg-slate-50 border border-slate-200 outline-none" placeholder="John Doe" />
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-sm font-bold text-slate-700 uppercase tracking-wider">Email Address</label>
-                            <input required type="email" class="w-full p-4 rounded-xl bg-slate-50 border border-slate-200 outline-none" placeholder="john@example.com" />
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                            <label class="text-sm font-bold text-slate-700 uppercase tracking-wider">Vehicle Model</label>
-                            <input required type="text" class="w-full p-4 rounded-xl bg-slate-50 border border-slate-200 outline-none" placeholder="e.g. Porsche 911 GT3" />
-                        </div>
-                    <button type="submit" class="w-full py-5 rounded-2xl bg-amber-500 text-white font-black text-xl uppercase tracking-widest hover:bg-amber-600 shadow-lg shadow-amber-200 transition-all">Request Appointment</button>
-                </form>
-            </div>
-        `
     }
 };
 
@@ -337,13 +299,15 @@ function buildLights() {
 }
 
 function buildDoors() {
-    const doorWidth = 40;
-    const doorHeight = 20;
+    const defaultHeight = 20;
 
     const fontLoader = new FontLoader();
     fontLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/fonts/helvetiker_bold.typeface.json', (font) => {
 
         Object.values(PAGES).forEach(data => {
+            const doorWidth = data.width || 40;
+            const doorHeight = defaultHeight;
+
             const group = new THREE.Group();
             group.position.copy(data.position);
             group.userData = { id: data.id, pageData: data };
