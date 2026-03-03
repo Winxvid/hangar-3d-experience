@@ -333,6 +333,7 @@ function buildLights() {
         centerLight.position.set(0, 50, 0);
         scene.add(centerLight);
     }
+}
 
 function buildDoors() {
     const defaultHeight = 20;
@@ -679,5 +680,4 @@ function animate() {
         camera.position.y = Math.max(-2 + 2, Math.min(58 - margin, camera.position.y));
     }
     renderer.render(scene, camera);
-}
 }
